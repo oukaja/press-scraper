@@ -1,17 +1,21 @@
 import uuid
-import MySQLdb
 from bidi.algorithm import get_display
 import arabic_reshaper
+import pymysql.cursors
+import datetime
 
 
 class AppPipeline(object):
 
-    def __init(self):
-        self.db = MySQLdb.connect("localhost", "root", "", "press")
-
-    def open_spider(self, spider):
+    def __init__(self):
+        self.db = pymysql.connect(host="localhost",  # your host
+                                  user="root",  # username
+                                  passwd="root",  # password
+                                  db="presscrawler",  # name of the database
+                                  charset='utf8mb4',
+                                  cursorclass=pymysql.cursors.DictCursor)
         cursor = self.db.cursor()
-        self.db.set_character_set('utf8')
+        self.db.set_charset("utf8")
         cursor.execute('SET NAMES utf8;')
         cursor.execute('SET CHARACTER SET utf8;')
         cursor.execute('SET character_set_connection=utf8;')
@@ -21,56 +25,24 @@ class AppPipeline(object):
     def process_item(self, item, spider):
         i = dict(item)
         cursor = self.db.cursor()
-        cursor.execute("SELECT id FROM article WHERE link='%s'" % (i["link"]))
+        cursor.execute("SELECT id FROM article WHERE link=%s", (i["link"]))
         results = cursor.rowcount
-        # print(results)
         if results == 0:
-            id = str(uuid.uuid4())
-            title = get_display(arabic_reshaper.reshape(u'' + i["title"]))
-            author = get_display(arabic_reshaper.reshape(u'' + i["author"]))
+            ida = uuid.uuid4().__str__()
+            title = get_display(arabic_reshaper.reshape(u'' + i["title"])).replace("'", "")
+            author = get_display(arabic_reshaper.reshape(u'' + i["author"])).replace("'", "")
             link = i["link"]
-            description = get_display(arabic_reshaper.reshape(u'' + "\n".join(i["description"])))
-            cursor.execute("INSERT INTO article(id, title, author, link, descrip) VALUES (%s,%s,%s,%s,%s) ",
-                           (id, title, author, link, description))
-            self.db.commit()
-            comments = i["comments"]
-            names = i["names"]
-            feedbacks = i["feedbacks"]
-            for comment, name, feedback in zip(comments, names, feedbacks):
-                try:
-                    cursor.execute(
-                        "INSERT INTO comments(id_article, comment, name, feedback) VALUES (%s,%s,%s,%s)",
-                        (id,
-                         get_display(arabic_reshaper.reshape(u'' + comment)),
-                         get_display(arabic_reshaper.reshape(u'' + name)),
-                         feedback
-                         )
-                    )
-                    self.db.commit()
-                except Exception as e:
-                    print(e)
-        else:
-            idup = cursor.fetchone()
-            cursor.execute("DELETE FROM comments WHERE id_article = '%s'" % (idup[0],))
-            self.db.commit()
-            comments = i["comments"]
-            names = i["names"]
-            feedbacks = i["feedbacks"]
-            for comment, name, feedback in zip(comments, names, feedbacks):
-                try:
-                    cursor.execute(
-                        "INSERT INTO comments(id_article, comment, name, feedback) VALUES (%s,%s,%s,%s)",
-                        (idup,
-                         get_display(arabic_reshaper.reshape(u'' + comment)),
-                         get_display(arabic_reshaper.reshape(u'' + name)),
-                         feedback
-                         )
-                    )
-                    self.db.commit()
-                except Exception as e:
-                    print(e)
+            journal = i["journal"]
+            publication = datetime.datetime.now()
+            try:
+                cursor.execute(query="INSERT INTO article(id, journal, title, author, link, publication) VALUES (%s,%s,%s,%s,%s,%s)",
+                               args=(ida, journal, title, author, link, publication))
+            except Exception as e:
+                print(e)
+            finally:
+                self.db.commit()
+                cursor.close()
         cursor.close()
-        return item
 
     def spider_closed(self, spider):
         self.db.close()

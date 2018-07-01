@@ -11,13 +11,9 @@ import os
 import re
 
 
-# from scrapy.crawler import CrawlerProcess
-
-
 class AppSpider(Spider):
     name = 'app'
     start_urls = []
-
     data = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sites.json')))
     for url in open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "start_url.txt"), 'r'):
         start_urls.append(url.replace("\n", ""))
@@ -26,7 +22,9 @@ class AppSpider(Spider):
     def cleanhtml(raw_html):
         cleanr = re.compile('<.*?>')
         cleantext = re.sub(cleanr, '', raw_html)
-        return cleantext.strip().rstrip().lstrip().replace("\n", " ")
+        # s = re.sub(r'[^\w\s]', '', cleantext)
+        s = cleantext.replace("\\", "").replace("\"", "")
+        return s.strip().rstrip().lstrip().replace("\n", " ")
 
     def start_requests(self):
         for url in self.start_urls:
@@ -44,25 +42,10 @@ class AppSpider(Spider):
     def parse_links(self, response):
         dn = response.meta['dn']
         item = ArticleItem()
+        item["journal"] = str(urlparse(response.url).hostname).split('.')[-2]
         item["title"] = get_display(
             arabic_reshaper.reshape(u'' + self.cleanhtml(response.xpath(dn["article"]["titre"]).extract_first())))
         item["author"] = get_display(
             arabic_reshaper.reshape(u'' + self.cleanhtml(response.xpath(dn["article"]["author"]).extract_first())))
         item["link"] = response.urljoin('')
-        item["description"] = [get_display(arabic_reshaper.reshape(u'' + self.cleanhtml(d))) for d in
-                               response.xpath(dn["article"]["description"]).extract()]
-        item["comments"] = [get_display(arabic_reshaper.reshape(u'' + self.cleanhtml(c))) for c in
-                            response.xpath(dn["article"]["comments"]).extract()]
-        item["names"] = [get_display(arabic_reshaper.reshape(u'' + self.cleanhtml(n))) for n in
-                         response.xpath(dn["article"]["names"]).extract()]
-        item["feedbacks"] = [get_display(arabic_reshaper.reshape(u'' + self.cleanhtml(f))) for f in
-                             response.xpath(dn["article"]["feedbacks"]).extract()]
         yield item
-
-#
-# if __name__ == "__main__":
-#     process = CrawlerProcess({
-#         'USER_AGENT': 'Mozilla/5.0 (compatible; MSIE 7.0; Windows NT 10.0)'
-#     })
-#     process.crawl(AppSpider)
-#     process.start()  # the script will block here until the crawling is finished
