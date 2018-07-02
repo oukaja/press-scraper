@@ -22,7 +22,7 @@ def about():
 def articles_api():
     db = pymysql.connect(host="localhost",  # your host
                               user="root",  # username
-                              passwd="root",  # password
+                              passwd="",  # password
                               db="presscrawler",  # name of the database
                               charset='utf8mb4',
                               cursorclass=pymysql.cursors.DictCursor)

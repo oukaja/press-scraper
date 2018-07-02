@@ -32,11 +32,12 @@ class AppPipeline(object):
             title = get_display(arabic_reshaper.reshape(u'' + i["title"])).replace("'", "")
             author = get_display(arabic_reshaper.reshape(u'' + i["author"])).replace("'", "")
             link = i["link"]
+            photo = i["photo"]
             journal = i["journal"]
             publication = datetime.datetime.now()
             try:
-                cursor.execute(query="INSERT INTO article(id, journal, title, author, link, publication) VALUES (%s,%s,%s,%s,%s,%s)",
-                               args=(ida, journal, title, author, link, publication))
+                cursor.execute(query="INSERT INTO article(id, journal, title, author, link, photo, publication) VALUES (%s,%s,%s,%s,%s,%s,%s)",
+                               args=(ida, journal, title, author, link, photo, publication))
             except Exception as e:
                 print(e)
             finally:

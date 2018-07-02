@@ -3,21 +3,24 @@
     "slid": "//*//*[@class='ei-slider-large']/li/a/@href",
     "article": {
       "titre": "//*[@class='bdaia-post-title']/h1/span/text()",
-      "author": "//*[@id='hibapressarticles']/p/text()"
+      "author": "//*[@id='hibapressarticles']/p/text()",
+      "photo": "//*[@class='bdaia-post-content']/div/a/img/@src"
     }
   },
   "hespress": {
     "slid": "//div[@class = 'headline_article']/div/h1/a/@href",
     "article": {
       "titre": "//div[@id = 'article_holder']/h1/text()",
-      "author": "//div[@id = 'article_body']/div/span/text()"
+      "author": "//div[@id = 'article_body']/div/span/text()",
+      "photo": "//div[@id = 'article_holder']/div/img/@src"
     }
   },
   "maghress": {
     "slid": "//div[@class='maintitlewrapper']/a/@href",
     "article": {
       "titre": "//*[@id='belowheader']/div[1]/table/tbody/tr/td/table/tbody/tr/td/div[2]/span[2]/text()",
-      "author": "//*[@id='belowheader']/div[1]/table/tbody/tr/td/table/tbody/tr/td/div[2]/div/a/text()"
+      "author": "//*[@id='belowheader']/div[1]/table/tbody/tr/td/table/tbody/tr/td/div[2]/div/a/text()",
+      "photo":"//*[@class='articleimagegroup']/img/@src"
     }
   }
 }

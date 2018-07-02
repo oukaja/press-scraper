@@ -47,5 +47,6 @@ class AppSpider(Spider):
             arabic_reshaper.reshape(u'' + self.cleanhtml(response.xpath(dn["article"]["titre"]).extract_first())))
         item["author"] = get_display(
             arabic_reshaper.reshape(u'' + self.cleanhtml(response.xpath(dn["article"]["author"]).extract_first())))
+        item["photo"] = response.xpath(dn["article"]["photo"]).extract_first()
         item["link"] = response.urljoin('')
         yield item
