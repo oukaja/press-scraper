@@ -38,7 +38,7 @@ def articles_api_nosql():
     client = pymongo.MongoClient("mongodb://localhost:27017/")
     db = client["kolchipress"]
     collection = db["articles"]
-    results = collection.find()
+    results = collection.find().sort("publication", -1)
     items = []
     for result in results:
         items.append(result)
@@ -50,7 +50,7 @@ def articles_api_nosql_by_journal(journal):
     client = pymongo.MongoClient("mongodb://localhost:27017/")
     db = client["kolchipress"]
     collection = db["articles"]
-    results = collection.find({"journal": journal})
+    results = collection.find({"journal": journal}).sort("publication", -1)
     items = []
     for result in results:
         items.append(result)
